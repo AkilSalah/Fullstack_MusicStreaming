@@ -1,0 +1,517 @@
+{
+    "info": {
+      "name": "Sonify API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Auth",
+        "item": [
+          {
+            "name": "Login",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/login",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "login"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"login\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Register",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/register",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "register"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"login\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "User Management",
+        "item": [
+          {
+            "name": "Get All Users",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/users",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "users"]
+              }
+            }
+          },
+          {
+            "name": "Update User Roles",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/users/:id/roles",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "users", ":id", "roles"],
+                "variable": [
+                  {
+                    "key": "id",
+                    "value": ""
+                  }
+                ]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "[\"USER\", \"ADMIN\"]",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Songs",
+        "item": [
+          {
+            "name": "Get All Songs",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/songs?page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "songs"],
+                "query": [
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Search Songs by Title",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/songs/search?titre=song&page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "songs", "search"],
+                "query": [
+                  {
+                    "key": "titre",
+                    "value": "song"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Create Song (Admin)",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/songs",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "songs"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"titre\": \"Song Title\",\n    \"duree\": 180,\n    \"trackNumber\": 1,\n    \"albumId\": \"album_id_here\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Get Songs by Album",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/songs/album/:albumId?page=0&size=10&sort=trackNumber,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "songs", "album", ":albumId"],
+                "variable": [
+                  {
+                    "key": "albumId",
+                    "value": ""
+                  }
+                ],
+                "query": [
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "trackNumber,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Update Song (Admin)",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/songs/:id",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "songs", ":id"],
+                "variable": [
+                  {
+                    "key": "id",
+                    "value": ""
+                  }
+                ]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"titre\": \"Updated Song Title\",\n    \"duree\": 180,\n    \"trackNumber\": 1,\n    \"albumId\": \"album_id_here\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Albums",
+        "item": [
+          {
+            "name": "Get All Albums",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/albums?page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "albums"],
+                "query": [
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Search Albums by Title",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/albums/search/titre?titre=album&page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "albums", "search", "titre"],
+                "query": [
+                  {
+                    "key": "titre",
+                    "value": "album"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Create Album (Admin)",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/albums",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "albums"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"titre\": \"Album Title\",\n    \"artiste\": \"Artist Name\",\n    \"annee\": 2024\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Search Albums by Artist",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/albums/search/artiste?artiste=artist&page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "albums", "search", "artiste"],
+                "query": [
+                  {
+                    "key": "artiste",
+                    "value": "artist"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Filter Albums by Year",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/user/albums/filter/annee?annee=2024&page=0&size=10&sort=titre,asc",
+                "host": ["{{base_url}}"],
+                "path": ["api", "user", "albums", "filter", "annee"],
+                "query": [
+                  {
+                    "key": "annee",
+                    "value": "2024"
+                  },
+                  {
+                    "key": "page",
+                    "value": "0"
+                  },
+                  {
+                    "key": "size",
+                    "value": "10"
+                  },
+                  {
+                    "key": "sort",
+                    "value": "titre,asc"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Update Album (Admin)",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/albums/:id",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "albums", ":id"],
+                "variable": [
+                  {
+                    "key": "id",
+                    "value": ""
+                  }
+                ]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"titre\": \"Updated Album Title\",\n    \"artiste\": \"Updated Artist Name\",\n    \"annee\": 2024\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Delete Album (Admin)",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/admin/albums/:id",
+                "host": ["{{base_url}}"],
+                "path": ["api", "admin", "albums", ":id"],
+                "variable": [
+                  {
+                    "key": "id",
+                    "value": ""
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "variable": [
+      {
+        "key": "base_url",
+        "value": "http://localhost:8080"
+      }
+    ]
+  }
