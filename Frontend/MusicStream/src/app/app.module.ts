@@ -11,6 +11,7 @@ import { playerReducer } from './features/store/reducers/trackPlayer.reducer';
 import { PlayerEffects } from './features/store/effects/audio-player.effects';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { RegisterComponent } from './features/auth/register/register.component';
     AppRoutingModule,
     FormsModule,
     StoreModule.forRoot({ player: playerReducer }),
-    EffectsModule.forRoot([PlayerEffects])
+    EffectsModule.forRoot([PlayerEffects]),
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
