@@ -9,8 +9,8 @@ import { FooterComponent } from './shared/components/footer/footer.component';
 import { FormsModule } from '@angular/forms';
 import { playerReducer } from './features/store/reducers/trackPlayer.reducer';
 import { PlayerEffects } from './features/store/effects/audio-player.effects';
-import { LoginComponent } from './features/login/login.component';
-import { RegisterComponent } from './features/register/register.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
 
 @NgModule({
   declarations: [
