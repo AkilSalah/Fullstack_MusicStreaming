@@ -1,7 +1,5 @@
 package com.music.security;
 
-import com.music.dto.RoleDTO;
-import com.music.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

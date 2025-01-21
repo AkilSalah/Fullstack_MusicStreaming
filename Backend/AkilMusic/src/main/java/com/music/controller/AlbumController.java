@@ -1,8 +1,6 @@
 package com.music.controller;
 
 import com.music.dto.AlbumDTO;
-import com.music.repository.AlbumRepository;
-import com.music.model.Album;
 import com.music.service.interfaces.AlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
