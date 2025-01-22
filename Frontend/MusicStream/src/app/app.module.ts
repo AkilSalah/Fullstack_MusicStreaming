@@ -11,8 +11,9 @@ import { playerReducer } from './features/store/reducers/trackPlayer.reducer';
 import { PlayerEffects } from './features/store/effects/audio-player.effects';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AlbumComponent } from './features/album/album.component';
+import { AuthInterceptor } from './auth-interceptor.interceptor';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,9 @@ import { AlbumComponent } from './features/album/album.component';
     EffectsModule.forRoot([PlayerEffects]),
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+    {provide : HTTP_INTERCEPTORS,useClass:AuthInterceptor,multi:true},
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
