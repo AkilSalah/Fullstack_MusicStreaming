@@ -7,11 +7,18 @@ import { Album } from '../../core/models/album';
   templateUrl: './album.component.html',
   styleUrl: './album.component.css'
 })
+
 export class AlbumComponent {
   albums: Album[] = [];
   currentPage = 0;
   totalPages = 0;
-
+  selectedAlbum: Album = {
+    id: '',
+    titre: '',
+    artiste: '',
+    annee: 0
+  };
+  showModal: boolean = false
   constructor(private albumService: AlbumService) {}
 
   ngOnInit(): void {
@@ -41,5 +48,69 @@ export class AlbumComponent {
       this.currentPage--;
       this.loadAlbums();
     }
+  }
+
+  addAlbum(album : Album):void{
+    this.albumService.createAlbum(album).subscribe({
+      next : (createdAlbum) => {
+        console.log("Album ajouté avec succes : ",createdAlbum);
+        this.loadAlbums();
+      },
+      error : (err) =>{
+        console.error('Erreur lors de l\'ajout de l\'album :', err);
+      }
+    })
+
+  }
+
+  updateAlbum(album: Album): void {
+    if (album.id) {
+      this.albumService.updateAlbum(album.id, album).subscribe({
+        next: (updatedAlbum) => {
+          console.log('Album mis à jour avec succès :', updatedAlbum);
+          this.loadAlbums(); 
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour de l\'album :', err);
+        },
+      });
+    }
+  }
+
+  deleteAlbum(id: string): void {
+    if (confirm('Are you sure you want to delete this album ?')) {
+      this.albumService.deleteAlbum(id).subscribe({
+        next: () => {
+          console.log('Album supprimé avec succès');
+          this.loadAlbums();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression de l\'album :', err);
+        },
+      });
+    }
+  }
+
+  selectAlbum(album: Album): void {
+    this.selectedAlbum = { ...album };
+  }
+
+  clearSelection(): void {
+    this.selectedAlbum = {
+      id: '',
+      titre: '',
+      artiste: '',
+      annee: 0
+    };
+  }
+
+  openModal(): void {
+    this.clearSelection();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.clearSelection();
   }
 }

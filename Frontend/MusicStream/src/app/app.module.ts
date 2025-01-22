@@ -27,10 +27,10 @@ import { AuthInterceptor } from './auth-interceptor.interceptor';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,
     StoreModule.forRoot({ player: playerReducer }),
     EffectsModule.forRoot([PlayerEffects]),
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [
     {provide : HTTP_INTERCEPTORS,useClass:AuthInterceptor,multi:true},

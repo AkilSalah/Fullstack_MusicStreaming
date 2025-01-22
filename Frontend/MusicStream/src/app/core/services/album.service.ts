@@ -30,15 +30,15 @@ export class AlbumService {
   }
 
   createAlbum(album: Album): Observable<any> {
-    return this.http.post(`${this.adminBaseUrl}/admin/albums`, album);
+    return this.http.post(`${this.adminBaseUrl}/albums`, album);
   }
 
   updateAlbum(id: string, album: Album): Observable<any> {
-    return this.http.put(`${this.adminBaseUrl}/admin/albums/${id}`, album);
+    return this.http.put(`${this.adminBaseUrl}/albums/${id}`, album);
   }
 
   deleteAlbum(id: string): Observable<any> {
-    return this.http.delete(`${this.adminBaseUrl}/albums/${id}`);
+    return this.http.delete(`${this.adminBaseUrl}/albums/${id}`,{responseType : 'text'});
   }
 
 
