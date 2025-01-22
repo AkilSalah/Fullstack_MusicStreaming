@@ -19,6 +19,7 @@ login(){
   this.authService.login(this.user).subscribe({
     next : (response) => {
       localStorage.setItem('token',response.token);
+      console.log(response.token)
       this.router.navigate(['/home']);
     },
     error:(err) =>{

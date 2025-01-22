@@ -20,6 +20,7 @@ export class RegisterComponent {
     register(){
       this.authService.register(this.user).subscribe({
         next : (respone) =>{
+          localStorage.setItem('token',respone.token);
           this.successMessage = 'Registration successful!';
           this.errorMessage = null;
           this.router.navigate(['/home'])
