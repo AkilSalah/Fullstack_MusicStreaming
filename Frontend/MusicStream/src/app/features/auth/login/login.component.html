@@ -10,7 +10,7 @@
             <div>
               <label class="text-gray-800 text-xs block mb-2">Email</label>
               <div class="relative flex items-center">
-                <input name="email" [(ngModel)]="user.email" type="text" required class="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none" placeholder="Enter email" />
+                <input name="email" [(ngModel)]="user.login" type="text" required class="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none" placeholder="Enter email" />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-[18px] h-[18px] absolute right-2" viewBox="0 0 682.667 682.667">
                   <defs>
                     <clipPath id="a" clipPathUnits="userSpaceOnUse">
@@ -36,10 +36,10 @@
             </div>
 
             <div class="mt-12">
-              <button type="button" class="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+              <button type="submit" class="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
                 Sign in
               </button>
-              <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+              <p *ngIf="errorMessage" class="error">Login failed {{ errorMessage }}</p>
             </div>
 
           </form>

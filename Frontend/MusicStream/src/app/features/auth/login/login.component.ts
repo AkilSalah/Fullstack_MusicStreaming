@@ -9,8 +9,9 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
 user = {
-  email : '',
-  password :''
+  login : '',
+  password :'',
+  roleNames : ['USER','ADMIN']
 };
 errorMessage : string | null = null;
 constructor(private authService :  AuthService , private router : Router){}
