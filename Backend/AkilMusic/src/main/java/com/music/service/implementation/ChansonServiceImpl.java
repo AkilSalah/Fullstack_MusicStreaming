@@ -1,9 +1,11 @@
 package com.music.service.implementation;
 
 import com.music.dto.ChansonDTO;
+import com.music.repository.AlbumRepository;
 import com.music.repository.ChansonRepository;
 import com.music.service.interfaces.ChansonService;
 import com.music.mapper.ChansonMapper;
+import com.music.model.Album;
 import com.music.model.Chanson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ public class ChansonServiceImpl implements ChansonService {
 
     private final ChansonRepository chansonRepository;
     private final ChansonMapper chansonMapper;
+    private final AlbumRepository albumRepository;
 
     @Override
     public Page<ChansonDTO> getAllChansons(Pageable pageable) {
@@ -44,10 +47,18 @@ public class ChansonServiceImpl implements ChansonService {
 
     @Override
     public ChansonDTO createChanson(ChansonDTO chansonDTO) {
-        Chanson chanson = chansonMapper.toEntity(chansonDTO);
-        Chanson savedChanson = chansonRepository.save(chanson);
-        return chansonMapper.toDto(savedChanson);
+    Album album = albumRepository.findById(chansonDTO.getAlbumId())
+        .orElseThrow(() -> new RuntimeException("Album not found"));
+
+    Chanson chanson = chansonMapper.toEntity(chansonDTO);
+    chanson.setAlbum(album);
+    Chanson savedChanson = chansonRepository.save(chanson);
+
+    ChansonDTO responseDTO = chansonMapper.toDto(savedChanson);
+    responseDTO.setAlbumId(album.getId());
+    return responseDTO;
     }
+
 
     @Override
     public ChansonDTO updateChanson(String id, ChansonDTO chansonDTO) {

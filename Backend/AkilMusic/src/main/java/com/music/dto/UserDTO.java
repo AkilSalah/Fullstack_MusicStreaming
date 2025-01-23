@@ -19,5 +19,5 @@ public class UserDTO {
     private Boolean active;
     private Set<RoleDTO> roles;
     private List<String> roleNames;
-    private String token;  // Used for login/register responses
+    private String token;  
 }
