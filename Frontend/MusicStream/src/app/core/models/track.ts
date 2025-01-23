@@ -7,8 +7,9 @@ export interface Track {
   duration: number;
   category: MusicCategory;
   fileUrl: string;
-  imageUrl?: string; // For image URL
-  imageFile?: Blob; // For image file
+  imageUrl?: string;
+  imageFile?: Blob; 
+  albumId : number;
 }
 
 export enum MusicCategory {
