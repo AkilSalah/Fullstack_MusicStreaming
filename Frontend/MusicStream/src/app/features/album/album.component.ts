@@ -18,12 +18,33 @@ export class AlbumComponent {
     artiste: '',
     annee: 0
   };
+
   showModal: boolean = false
+
   constructor(private albumService: AlbumService) {}
 
   ngOnInit(): void {
     this.loadAlbums();
   }
+
+  openModalForUpdate(album: Album): void {
+    this.selectedAlbum = { ...album }; 
+    this.showModal = true;
+  }
+
+  onSubmit(): void {
+    if (!this.selectedAlbum.titre || !this.selectedAlbum.artiste || !this.selectedAlbum.annee) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (this.selectedAlbum.id) {
+      this.updateAlbum(this.selectedAlbum);
+    } else {
+      this.addAlbum(this.selectedAlbum);
+    }
+  }
+
   loadAlbums(): void {
     this.albumService.getAlbums(this.currentPage).subscribe({
       next: (data) => {
@@ -50,17 +71,18 @@ export class AlbumComponent {
     }
   }
 
-  addAlbum(album : Album):void{
+  addAlbum(album: Album): void {
     this.albumService.createAlbum(album).subscribe({
-      next : (createdAlbum) => {
-        console.log("Album ajouté avec succes : ",createdAlbum);
+      next: (createdAlbum) => {
+        console.log("Album added successfully:", createdAlbum);
         this.loadAlbums();
+        this.closeModal();
       },
-      error : (err) =>{
-        console.error('Erreur lors de l\'ajout de l\'album :', err);
+      error: (err) => {
+        console.error('Error adding album:', err);
+        alert('Error adding album. Please try again.');
       }
-    })
-
+    });
   }
 
   updateAlbum(album: Album): void {

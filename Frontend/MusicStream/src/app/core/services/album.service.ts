@@ -29,8 +29,9 @@ export class AlbumService {
     return this.http.get(`${this.userBaseUrl}/albums/${id}`);
   }
 
-  createAlbum(album: Album): Observable<any> {
-    return this.http.post(`${this.adminBaseUrl}/albums`, album);
+  createAlbum(album: Album): Observable<Album> {
+    const { id, ...albumWithoutId } = album;
+    return this.http.post<Album>(`${this.adminBaseUrl}/albums`, albumWithoutId);
   }
 
   updateAlbum(id: string, album: Album): Observable<any> {
