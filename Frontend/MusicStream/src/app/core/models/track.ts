@@ -9,7 +9,7 @@ export interface Track {
   fileUrl: string;
   imageUrl?: string;
   imageFile?: Blob; 
-  albumId : number;
+  albumId : string;
 }
 
 export enum MusicCategory {

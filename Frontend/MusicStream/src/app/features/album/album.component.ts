@@ -91,6 +91,8 @@ export class AlbumComponent {
         next: (updatedAlbum) => {
           console.log('Album mis à jour avec succès :', updatedAlbum);
           this.loadAlbums(); 
+          this.closeModal();
+
         },
         error: (err) => {
           console.error('Erreur lors de la mise à jour de l\'album :', err);
