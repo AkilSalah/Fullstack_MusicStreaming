@@ -74,7 +74,13 @@
           <div class="p-5">
             <h3 class="text-gray-800 text-xl font-bold">{{album.titre}}</h3>
             <p class="mt-2 text-xl text-gray-500 leading-relaxed">{{album.artiste}}</p>
-            <button type="button" class="mt-6 px-5 w-full py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-purple-600 hover:bg-purple-700 active:bg-blue-600">View</button>
+            <button
+            type="button"
+            routerLink="/library/{{album.id}}"
+            class="mt-6 px-5 w-full py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-purple-600 hover:bg-purple-700 active:bg-blue-600"
+          >
+            View
+          </button>
           </div>
         </div>
       </div>

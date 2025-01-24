@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+// import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -19,13 +19,13 @@ public class ChansonDTO {
     @Size(max = 100, message = "Le titre ne peut pas dépasser 100 caractères.")
     private String titre;
 
-    @NotNull(message = "La durée de la chanson est obligatoire.")
-    @Positive(message = "La durée doit être un entier positif.")
-    private Integer duree;
+    // @NotNull(message = "La durée de la chanson est obligatoire.")
+    // @Positive(message = "La durée doit être un entier positif.")
+    // private Integer duree;
 
-    @NotNull(message = "Le numéro de piste est obligatoire.")
-    @Positive(message = "Le numéro de piste doit être un entier positif.")
-    private Integer trackNumber;
+    // @NotNull(message = "Le numéro de piste est obligatoire.")
+    // @Positive(message = "Le numéro de piste doit être un entier positif.")
+    // private Integer trackNumber;
 
     @Size(max = 500, message = "La description ne peut pas dépasser 500 caractères.")
     private String description;

@@ -112,7 +112,7 @@ export class LibraryComponent  {
     };
   }
   onSubmit(): void {
-    if (!this.selectedTrack.titre || !this.selectedTrack.artiste || !this.selectedTrack.category) {
+    if (!this.selectedTrack.titre || !this.selectedTrack.category) {
       alert('Please fill in all required fields');
       return;
     }
@@ -123,7 +123,7 @@ export class LibraryComponent  {
       this.createSong();
     }
   }
-  
+
    selectTrack(song: Track): void {
       this.selectedTrack = { ...song };
   }

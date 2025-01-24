@@ -1,15 +1,15 @@
 export interface Track {
   id: string;
   titre: string;
-  artiste: string;
+  artiste?: string;
   description?: string;
   date: Date;
-  duree: number;
+  duree?: number;
   category: MusicCategory;
   audioFile: string;
   imageUrl?: string;
   imageFile?: Blob; 
-  albumId : string;
+  albumId ?: string;
 }
 
 export enum MusicCategory {
