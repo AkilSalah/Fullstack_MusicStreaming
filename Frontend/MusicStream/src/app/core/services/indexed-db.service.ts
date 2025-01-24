@@ -130,14 +130,14 @@ export class TrackService {
   }
   
   addTrack(track: Track, audioFile: Blob, imageFile?: Blob): Observable<Track> {
-    if (!track || !track.title || !track.artist) {
+    if (!track || !track.titre || !track.artiste) {
       return throwError(() => new Error('Invalid track data.'));
     }
 
     const trackToSave: Track = {
       ...track,
       id: track.id || uuidv4(),
-      addedAt: track.addedAt || new Date()
+      date: track.date || new Date()
     };
 
     return this.saveTrackMetadata(trackToSave).pipe(

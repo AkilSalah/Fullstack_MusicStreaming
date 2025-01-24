@@ -1,12 +1,12 @@
 export interface Track {
   id: string;
-  title: string;
-  artist: string;
+  titre: string;
+  artiste: string;
   description?: string;
-  addedAt: Date;
-  duration: number;
+  date: Date;
+  duree: number;
   category: MusicCategory;
-  fileUrl: string;
+  audioFile: string;
   imageUrl?: string;
   imageFile?: Blob; 
   albumId : string;

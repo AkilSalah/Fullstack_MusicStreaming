@@ -1,10 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subject, catchError, map, takeUntil } from 'rxjs';
 import { MusicCategory, Track } from '../../core/models/track';
-import { TrackService } from '../../core/services/indexed-db.service';
-import { SearchService } from '../../core/services/search.service';
 import { SongService } from '../../core/services/song.service';
-import { addTrack } from '../store/actions/track.action';
 
 @Component({
   selector: 'app-library',
@@ -18,7 +14,7 @@ export class LibraryComponent  {
   pageSize = 10;
   totalItems = 0;
   searchTerm = '';
-  selectedTrack: Track = { id: '', title: '',addedAt : new Date,artist : '', category: MusicCategory.OTHER,duration:0,fileUrl:'',imageUrl:'',description:'',albumId:'' };
+  selectedTrack: Track = { id: '', titre: '',date : new Date,artiste : '', category: MusicCategory.OTHER,duree:0,audioFile:'',imageUrl:'',description:'',albumId:'' };
   categories = Object.values(MusicCategory);
   showModal: boolean = false
 
@@ -29,58 +25,65 @@ export class LibraryComponent  {
   }
 
   loadSongs() {
-    this.songService.getAllSongs(this.currentPage, this.pageSize).subscribe(
-      (response: any) => {
-        this.songs = response.content;
-        this.totalItems = response.totalElements;
+    this.songService.getAllSongs(this.currentPage, this.pageSize).subscribe({
+      next : (data) =>{
+        this.songs = data.content;
+        this.totalItems = data.totalElements;
+        console.log('Songs loaded:', data.content);
       },
-      error => console.error('Error loading songs:', error)
-    );
+      error: (err) => {
+        console.error('Erreur lors du chargement des albums :', err);
+      },
+    });
   }
 
   searchSongs() {
     if (this.searchTerm.trim()) {
-      this.songService.searchSongsByTitle(this.searchTerm, this.currentPage, this.pageSize).subscribe(
-        (response: any) => {
+      this.songService.searchSongsByTitle(this.searchTerm, this.currentPage, this.pageSize).subscribe({
+        next : (response) =>{
           this.songs = response.content;
           this.totalItems = response.totalElements;
         },
-        error => console.error('Error searching songs:', error)
-      );
+        error : 
+        (error) => console.error('Error searching songs:', error)
+    })
     } else {
       this.loadSongs();
     }
   }
 
   createSong() {
-    this.songService.createSong(this.selectedTrack).subscribe(
-      (createdSong) => {
+    this.songService.createSong(this.selectedTrack).subscribe({
+       next : (createdSong) => {
         this.songs.unshift(createdSong);
-        this.selectedTrack = { id: '', title: '',addedAt : new Date,artist : '', category: MusicCategory.OTHER,duration:0,fileUrl:'',imageUrl:'',description:'',albumId:'' };
+        this.selectedTrack = { id: '', titre: '',date : new Date,artiste : '', category: MusicCategory.OTHER,duree:0,audioFile:'',imageUrl:'',description:'',albumId:'' };
       },
+      error :
       error => console.error('Error creating song:', error)
-    );
+    });
   }
 
   updateSong(song: Track) {
-    this.songService.updateSong(song.id, song).subscribe(
-      (updatedSong) => {
+    this.songService.updateSong(song.id, song).subscribe({
+      next : (updatedSong) => {
         const index = this.songs.findIndex(s => s.id === updatedSong.id);
         if (index !== -1) {
           this.songs[index] = updatedSong;
         }
       },
+      error :
       error => console.error('Error updating song:', error)
-    );
+  });
   }
 
   deleteSong(id: string) {
-    this.songService.deleteSong(id).subscribe(
-      () => {
+    this.songService.deleteSong(id).subscribe({
+     next : () => {
         this.songs = this.songs.filter(song => song.id !== id);
       },
+      error :
       error => console.error('Error deleting song:', error)
-    );
+  });
   }
 
   nextPage() {
@@ -97,19 +100,19 @@ export class LibraryComponent  {
   clearSelection(): void {
     this.selectedTrack = {
       id: '',
-      title: '',
-      artist: '',
-      addedAt : new Date,
+      titre: '',
+      artiste: '',
+      date : new Date,
       category: MusicCategory.OTHER,
-      duration:0,
-      fileUrl:'',
+      duree:0,
+      audioFile:'',
       imageUrl:'',
       description:'',
       albumId:'' 
     };
   }
   onSubmit(): void {
-    if (!this.selectedTrack.title || !this.selectedTrack.artist || !this.selectedTrack.category) {
+    if (!this.selectedTrack.titre || !this.selectedTrack.artiste || !this.selectedTrack.category) {
       alert('Please fill in all required fields');
       return;
     }
@@ -120,6 +123,7 @@ export class LibraryComponent  {
       this.createSong();
     }
   }
+  
    selectTrack(song: Track): void {
       this.selectedTrack = { ...song };
   }
@@ -131,7 +135,7 @@ export class LibraryComponent  {
 
   openModal(){
     this.clearSelection();
-    this.showModal = false;
+    this.showModal = true;
   }
 
   closeModal(): void {
