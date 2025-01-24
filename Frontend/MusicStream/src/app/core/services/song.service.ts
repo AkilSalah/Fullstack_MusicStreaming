@@ -38,7 +38,8 @@ export class SongService {
   }
 
   createSong(song: Track): Observable<Track> {
-    return this.http.post<Track>(`${this.adminBaseUrl}`, song);
+    const { id, ...songWithoutId } = song;
+    return this.http.post<Track>(`${this.adminBaseUrl}`, songWithoutId);
   }
 
   updateSong(id: string, song: Track): Observable<Track> {

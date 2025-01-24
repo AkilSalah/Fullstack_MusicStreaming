@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MusicCategory, Track } from '../../core/models/track';
 import { SongService } from '../../core/services/song.service';
+import { data } from 'autoprefixer';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-library',
@@ -17,11 +19,19 @@ export class LibraryComponent  {
   selectedTrack: Track = { id: '', titre: '',date : new Date,artiste : '', category: MusicCategory.OTHER,duree:0,audioFile:'',imageUrl:'',description:'',albumId:'' };
   categories = Object.values(MusicCategory);
   showModal: boolean = false
+  albumId: string | null = null;
 
-  constructor(private songService: SongService) {}
+  constructor(private songService: SongService,private router :ActivatedRoute) {}
 
-  ngOnInit() {
-    this.loadSongs();
+  ngOnInit(): void {
+    this.albumId = this.router.snapshot.paramMap.get('id');
+  
+    if (this.albumId) {
+      console.log('Album ID:', this.albumId);
+      this.loadSongsByAlbum(this.albumId);
+    } else {
+      console.error('Album ID is missing.');
+    }
   }
 
   loadSongs() {
@@ -34,6 +44,18 @@ export class LibraryComponent  {
       error: (err) => {
         console.error('Erreur lors du chargement des albums :', err);
       },
+    });
+  }
+  loadSongsByAlbum(albumId: string) {
+    this.songService.getSongsByAlbum(albumId, this.currentPage, this.pageSize).subscribe({
+      next: (data) => {
+        this.songs = data.content;
+        this.totalItems = data.totalElements;
+        console.log('Songs loaded:', this.songs);
+      },
+      error: (err) => {
+        console.error('Error loading songs:', err);
+      }
     });
   }
 
@@ -53,6 +75,12 @@ export class LibraryComponent  {
   }
 
   createSong() {
+    if (!this.albumId) {
+      alert('Album ID is missing.');
+      return;
+    }
+    this.selectedTrack.albumId = this.albumId;
+
     this.songService.createSong(this.selectedTrack).subscribe({
        next : (createdSong) => {
         this.songs.unshift(createdSong);
@@ -108,7 +136,7 @@ export class LibraryComponent  {
       audioFile:'',
       imageUrl:'',
       description:'',
-      albumId:'' 
+      albumId: this.albumId || '' 
     };
   }
   onSubmit(): void {
