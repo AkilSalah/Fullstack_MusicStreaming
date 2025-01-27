@@ -15,6 +15,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AlbumComponent } from './features/album/album.component';
 import { AuthInterceptor } from './auth-interceptor.interceptor';
 import { DateFormatPipe } from './shared/pipes/date-format.pipe';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { DateFormatPipe } from './shared/pipes/date-format.pipe';
     LoginComponent,
     RegisterComponent,
     AlbumComponent,
+    DashboardComponent,
   ],
   imports: [
     BrowserModule,
