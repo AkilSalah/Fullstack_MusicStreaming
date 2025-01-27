@@ -62,13 +62,19 @@ public class ChansonServiceImpl implements ChansonService {
 
     @Override
     public ChansonDTO updateChanson(String id, ChansonDTO chansonDTO) {
+        Album album = albumRepository.findById(chansonDTO.getAlbumId())
+        .orElseThrow(() -> new RuntimeException("Album not found"));
+
         if (!chansonRepository.existsById(id)) {
             throw new RuntimeException("Chanson not found");
         }
         Chanson chanson = chansonMapper.toEntity(chansonDTO);
+        chanson.setAlbum(album);
         chanson.setId(id);
         Chanson updatedChanson = chansonRepository.save(chanson);
-        return chansonMapper.toDto(updatedChanson);
+        ChansonDTO resDto = chansonMapper.toDto(updatedChanson);
+        resDto.setAlbumId(album.getId());
+        return resDto;
     }
 
     @Override
