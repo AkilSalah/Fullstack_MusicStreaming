@@ -14,6 +14,7 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AlbumComponent } from './features/album/album.component';
 import { AuthInterceptor } from './auth-interceptor.interceptor';
+import { DateFormatPipe } from './shared/pipes/date-format.pipe';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,7 @@ import { AuthInterceptor } from './auth-interceptor.interceptor';
     StoreModule.forRoot({ player: playerReducer }),
     EffectsModule.forRoot([PlayerEffects]),
     HttpClientModule,
-    FormsModule
+    FormsModule,
   ],
   providers: [
     {provide : HTTP_INTERCEPTORS,useClass:AuthInterceptor,multi:true},
