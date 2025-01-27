@@ -63,7 +63,8 @@ toggleRole(role: string) {
     this.selectedRoles = this.selectedRoles.filter((r) => r !== role);
   } else {
     this.selectedRoles.push(role);
-  }
+    
+  } 
 }
 
 updateRoles() {
