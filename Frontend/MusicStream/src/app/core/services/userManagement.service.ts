@@ -13,7 +13,11 @@ export class UserService {
   getUsers():Observable<any>{
   return this.http.get(`${this.baseUrl}`)  
   }
-  
+
+  updateUserRoles(id: string, roles: string[]): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}/roles`, roles)
+  }
+
   deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

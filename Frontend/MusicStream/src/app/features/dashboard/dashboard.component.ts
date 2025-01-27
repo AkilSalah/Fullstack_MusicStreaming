@@ -9,6 +9,11 @@ import { UserService } from '../../core/services/userManagement.service';
 })
 export class DashboardComponent {
   users : any[] =[]
+  allRoles: string[] = ['ADMIN', 'USER'];
+  selectedUser: any = null;
+  selectedRoles: string[] = [];
+  isEditModalOpen: boolean = false;
+
   constructor(private userManagement : UserService){}
 
   ngOnInit(): void {
@@ -37,6 +42,41 @@ export class DashboardComponent {
       error : (err)=>{
         console.log("error lors de la suppression de user",err)
       }
+    })
+  }
+}
+
+openEditRolesModal(user: any) {
+  this.selectedUser = user;
+  this.selectedRoles = user.roles.map((role: any) => role.name);
+  this.isEditModalOpen = true;
+}
+
+closeEditModal() {
+  this.isEditModalOpen = false;
+  this.selectedUser = null;
+  this.selectedRoles = [];
+}
+
+toggleRole(role: string) {
+  if (this.selectedRoles.includes(role)) {
+    this.selectedRoles = this.selectedRoles.filter((r) => r !== role);
+  } else {
+    this.selectedRoles.push(role);
+  }
+}
+
+updateRoles() {
+  if (this.selectedUser) {
+    this.userManagement.updateUserRoles(this.selectedUser.id, this.selectedRoles).subscribe({
+      next: (updatedUser) => {
+        console.log("User roles updated:", updatedUser)
+        this.loadUsers()
+        this.closeEditModal()
+      },
+      error: (error) => {
+        console.error("Error updating user roles:", error)
+      },
     })
   }
 }
