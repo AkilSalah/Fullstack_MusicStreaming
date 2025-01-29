@@ -4,19 +4,20 @@ import { of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import * as PlayerActions from '../actions/audio-player.action';
 import { TrackService } from '../../../core/services/indexed-db.service';
+import { SongService } from '../../../core/services/song.service';
 
 @Injectable()
 export class PlayerEffects {
   constructor(
     private actions$: Actions,
-    private trackService: TrackService
+    private trackService: SongService
   ) {}
 
   loadTrack$ = createEffect(() =>
     this.actions$.pipe(
       ofType(PlayerActions.startLoading),
       switchMap(({ id }) =>
-        this.trackService.getTrackById(id).pipe(
+        this.trackService.getSongById(id).pipe(
           map((track) =>
             track
               ? PlayerActions.loadSuccess({ track })

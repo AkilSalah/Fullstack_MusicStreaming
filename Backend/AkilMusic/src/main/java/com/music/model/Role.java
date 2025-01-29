@@ -18,7 +18,6 @@ public class Role {
     private String id;
     private String name;
     
-   
     @DBRef(lazy = true)
     private Set<User> users;
 }

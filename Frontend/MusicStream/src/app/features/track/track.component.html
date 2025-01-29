@@ -5,23 +5,23 @@
             <div class="w-full md:w-5/12 lg:w-1/3">
                 <div class="overflow-hidden rounded-md shadow-md">
                   <img [src]="imageUrl || '../../../assets/img/fa.jpg'" 
-                  [alt]="(track$ | async)?.titre || 'Track image'" 
+                  [alt]="'Track image'" 
                   class="rounded-md w-full">
                 </div>
             </div>
 
-            <div class="w-full md:w-7/12 lg:w-2/3">
+            <div *ngIf="track" class="w-full md:w-7/12 lg:w-2/3">
                 <div class="text-white">
                   <div class="mb-4 md:mb-8">
                     <p class="text-sm uppercase tracking-wide text-gray-300">See what's new</p>
-                    <h2 class="text-2xl md:text-3xl font-bold">{{ (track$ | async)?.artiste }}</h2>
+                    <!-- <h2 class="text-2xl md:text-3xl font-bold">{{ (track$ | async)?.artiste }}</h2> -->
                   </div>
                   <p class="mb-6 text-gray-300">
-                    {{ (track$ | async)?.description }}
+                    {{ track.description }}
                   </p>
                   <div class="space-y-4">
                     <div class="font-bold text-gray-200">
-                      <p>{{ (track$ | async)?.titre }}</p>
+                      <p>{{ track.titre }}</p>
                     </div>
                     <div class="bg-[#1E1E1E] p-4 rounded-lg w-full max-w-2xl">
                       <div class="flex items-center space-x-4">

@@ -12,6 +12,10 @@ export class SongService {
 
   constructor(private http : HttpClient) { }
 
+  getSongById(id : string) : Observable<any>{
+    return this.http.get(`${this.userBaseUrl}/${id}`)
+  }
+
   getAllSongs(page = 0 ,size = 6 ,sort = 'titre.asc') : Observable<any>{
     let params = new HttpParams()
     .set('page' , page.toString())

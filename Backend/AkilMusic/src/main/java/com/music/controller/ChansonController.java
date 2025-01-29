@@ -25,6 +25,12 @@ public class ChansonController {
         return ResponseEntity.ok(chansonService.getAllChansons(pageable));
     }
 
+    @GetMapping("/api/user/songs/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<ChansonDTO> getChansonById(@PathVariable String id) {
+        return ResponseEntity.ok(chansonService.getChansonById(id));
+    }
+    
     @GetMapping("/api/user/songs/search")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Page<ChansonDTO>> searchChansonsByTitle(

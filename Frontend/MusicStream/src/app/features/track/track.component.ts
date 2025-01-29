@@ -7,6 +7,7 @@ import * as PlayerActions from '../store/actions/audio-player.action';
 import * as PlayerSelectors from '../store/selectors/audio-player.selectors';
 import { Track } from '../../core/models/track';
 import { PlayerState } from '../store/reducers/trackPlayer.reducer';
+import { SongService } from '../../core/services/song.service';
 
 @Component({
   selector: 'app-track',
@@ -15,11 +16,12 @@ import { PlayerState } from '../store/reducers/trackPlayer.reducer';
 export class TrackComponent implements OnInit {
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
   
-  track$: Observable<Track | null>;
+  track: any = {};
   playerStatus$: Observable<PlayerState>;
   playerError$: Observable<string | null>;
   audioUrl: string | null = null;
   imageUrl: string | null = null;  
+  trackId : string | null = null;
 
   // Player state
   isPlaying = false;
@@ -35,44 +37,53 @@ export class TrackComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private trackService: TrackService,
+    private trackService: SongService,
     private store: Store
   ) {
-    this.track$ = this.store.select(PlayerSelectors.selectCurrentTrack);
+    this.track = this.store.select(PlayerSelectors.selectCurrentTrack);
     this.playerStatus$ = this.store.select(PlayerSelectors.selectPlayerStatus);
     this.playerError$ = this.store.select(PlayerSelectors.selectPlayerError);
   }
-  private loadTrackImage(trackId: string) {
-    this.trackService.getImageFile(trackId).subscribe({
-      next: (imageBlob) => {
-        if (imageBlob) {
-          // Nettoyer l'ancienne URL si elle existe
-          if (this.imageUrl) {
-            URL.revokeObjectURL(this.imageUrl);
-          }
-          // Créer une nouvelle URL pour l'image
-          this.imageUrl = URL.createObjectURL(imageBlob);
-        }
-      },
-      error: (error) => {
-        console.error('Error loading track image:', error);
-      }
-    });
+  
+  ngOnInit(): void {
+    this.trackId = this.route.snapshot.paramMap.get('id');
+    if (this.trackId) {
+      this.loadSongById(this.trackId);
+    } else {
+      console.log('Error loading track');
+    }
   }
-  ngOnInit() {
-    this.trackService.getAllTrackMetadata().pipe(
-      switchMap(tracks => {
-        this.tracks = tracks;
-        return this.route.params;
-      })
-    ).subscribe(params => {
-      const trackId = params['id'];
-      this.currentTrackIndex = this.tracks.findIndex(t => t.id === trackId);
-      this.loadTrack(trackId);
+
+  loadSongById(id: string) {
+    this.trackService.getSongById(id).subscribe({
+      next: (data) => {
+        this.track = data; 
+        console.log("loaded song with id: " + id);
+        console.log(this.track);
+      },
+      error: (err) => {
+        console.log("error loading song with id " + id, err);
+      },
     });
   }
   
-
+// private loadTrackImage(trackId: string) {
+  //   this.trackService.getImageFile(trackId).subscribe({
+  //     next: (imageBlob) => {
+  //       if (imageBlob) {
+  //         // Nettoyer l'ancienne URL si elle existe
+  //         if (this.imageUrl) {
+  //           URL.revokeObjectURL(this.imageUrl);
+  //         }
+  //         // Créer une nouvelle URL pour l'image
+  //         this.imageUrl = URL.createObjectURL(imageBlob);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading track image:', error);
+  //     }
+  //   });
+  // }
   private formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
@@ -120,40 +131,40 @@ export class TrackComponent implements OnInit {
     this.duration = this.formatTime(audio.duration);
   }
 
-  private loadTrack(trackId: string) {
-    this.store.dispatch(PlayerActions.startLoading({ id: trackId }));
+  // private loadTrack(trackId: string) {
+  //   this.store.dispatch(PlayerActions.startLoading({ id: trackId }));
     
-    this.trackService.getTrackById(trackId).pipe(
-      tap(track => {
-        if (track) {
-          this.store.dispatch(PlayerActions.loadSuccess({ track }));
-          this.loadTrackImage(track.id);
-        } else {
-          this.store.dispatch(PlayerActions.loadError({ error: 'Track not found' }));
-        }
-      }),
-      switchMap(track => {
-        if (!track) {
-          throw new Error('Track not found');
-        }
-        return this.trackService.getAudioFile(track.id);
-      })
-    ).subscribe({
-      next: (audioBlob) => {
-        if (audioBlob) {
-          if (this.audioUrl) {
-            URL.revokeObjectURL(this.audioUrl);
-          }
-          this.audioUrl = URL.createObjectURL(audioBlob);
-        } else {
-          this.store.dispatch(PlayerActions.loadError({ error: 'Audio file not found' }));
-        }
-      },
-      error: (error) => {
-        this.store.dispatch(PlayerActions.loadError({ error: error.message }));
-      }
-    });
-  }
+  //   this.trackService.getTrackById(trackId).pipe(
+  //     tap(track => {
+  //       if (track) {
+  //         this.store.dispatch(PlayerActions.loadSuccess({ track }));
+  //         this.loadTrackImage(track.id);
+  //       } else {
+  //         this.store.dispatch(PlayerActions.loadError({ error: 'Track not found' }));
+  //       }
+  //     }),
+  //     switchMap(track => {
+  //       if (!track) {
+  //         throw new Error('Track not found');
+  //       }
+  //       return this.trackService.getAudioFile(track.id);
+  //     })
+  //   ).subscribe({
+  //     next: (audioBlob) => {
+  //       if (audioBlob) {
+  //         if (this.audioUrl) {
+  //           URL.revokeObjectURL(this.audioUrl);
+  //         }
+  //         this.audioUrl = URL.createObjectURL(audioBlob);
+  //       } else {
+  //         this.store.dispatch(PlayerActions.loadError({ error: 'Audio file not found' }));
+  //       }
+  //     },
+  //     error: (error) => {
+  //       this.store.dispatch(PlayerActions.loadError({ error: error.message }));
+  //     }
+  //   });
+  // }
 
   nextTrack() {
     if (this.currentTrackIndex < this.tracks.length - 1) {
