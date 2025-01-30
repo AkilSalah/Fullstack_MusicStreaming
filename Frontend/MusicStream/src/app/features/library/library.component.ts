@@ -23,25 +23,93 @@ export class LibraryComponent {
     category: MusicCategory.OTHER,
     duree: 0,
     audioFile: '',
-    imageUrl: '',
     description: '',
     albumId: ''
   };
   categories = Object.values(MusicCategory);
   showModal: boolean = false;
   albumId: string | null = null;
+  selectedAudioFile: File | null = null;
 
   constructor(private songService: SongService, private router: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.albumId = this.router.snapshot.paramMap.get('id'); 
+    this.albumId = this.router.snapshot.paramMap.get('id');
     if (this.albumId) {
       console.log('Album ID:', this.albumId);
-      this.loadSongsByAlbum(this.albumId); 
+      this.loadSongsByAlbum(this.albumId);
     } else {
       console.error('Album ID is missing.');
     }
   }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedAudioFile = file;
+      this.selectedTrack.audioFile = file.name;
+    }
+  }
+
+  createSong(): void {
+    if (!this.albumId) {
+        alert('Album ID is missing.');
+        return;
+    }
+    if (!this.selectedAudioFile) {
+        alert('Please select an audio file.');
+        return;
+    }
+
+    if (!this.selectedAudioFile.type.startsWith('audio/')) {
+        alert('Please select a valid audio file.');
+        return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (this.selectedAudioFile.size > maxSize) {
+        alert('File size too large. Please select a file under 10MB.');
+        return;
+    }
+
+    this.selectedTrack.date = new Date(this.selectedTrack.date);
+    this.selectedTrack.albumId = this.albumId;
+
+    let loading = true; 
+
+    this.songService.createSong(this.selectedTrack, this.selectedAudioFile).subscribe({
+        next: (createdSong) => {
+            this.songs.unshift(createdSong);
+            this.clearSelection();
+            console.log('Song created successfully:', createdSong);
+            this.closeModal();
+        },
+        error: (error) => {
+            console.error('Error creating song:', error);
+            alert('Failed to upload song. Please check the console for details.');
+        },
+        complete: () => {
+            loading = false;
+        }
+    });
+}
+
+  clearSelection(): void {
+    this.selectedTrack = {
+      id: '',
+      titre: '',
+      date: new Date(),
+      artiste: '',
+      category: MusicCategory.OTHER,
+      duree: 0,
+      audioFile: '',
+      description: '',
+      albumId: ''
+    };
+    this.selectedAudioFile = null;
+  }
+
+
 
   loadSongs() {
     this.songService.getAllSongs(this.currentPage, this.pageSize).subscribe({
@@ -69,6 +137,7 @@ export class LibraryComponent {
     });
   }
 
+
   searchSongs() {
     if (this.searchTerm.trim()) {
       this.songService.searchSongsByTitle(this.searchTerm, this.currentPage, this.pageSize).subscribe({
@@ -81,24 +150,6 @@ export class LibraryComponent {
     } else {
       this.loadSongs();
     }
-  }
-
-  createSong() {
-    if (!this.albumId) {
-      alert('Album ID is missing.');
-      return;
-    }
-
-    this.selectedTrack.albumId = this.albumId;
-
-    this.songService.createSong(this.selectedTrack).subscribe({
-      next: (createdSong) => {
-        this.songs.unshift(createdSong);
-        this.clearSelection();
-        console.log('Song created successfully:', createdSong);
-      },
-      error: (error) => console.error('Error creating song:', error)
-    });
   }
 
   updateSong(song: Track) {
@@ -135,21 +186,6 @@ export class LibraryComponent {
       this.currentPage--;
       this.loadSongs();
     }
-  }
-
-  clearSelection(): void {
-    this.selectedTrack = {
-      id: '',
-      titre: '',
-      artiste: '',
-      date: new Date(),
-      category: MusicCategory.OTHER,
-      duree: 0,
-      audioFile: '',
-      imageUrl: '',
-      description: '',
-      albumId: this.albumId || '' 
-    };
   }
 
   onSubmit(): void {

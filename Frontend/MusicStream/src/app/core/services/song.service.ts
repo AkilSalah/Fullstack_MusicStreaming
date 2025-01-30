@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { Track } from '../models/track';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class SongService {
   getSongById(id : string) : Observable<any>{
     return this.http.get(`${this.userBaseUrl}/${id}`)
   }
-
+  
   getAllSongs(page = 0 ,size = 6 ,sort = 'titre.asc') : Observable<any>{
     let params = new HttpParams()
     .set('page' , page.toString())
@@ -41,11 +41,34 @@ export class SongService {
     return this.http.get(`${this.userBaseUrl}/album/${albumId}`, { params });
   }
 
-  createSong(song: Track): Observable<Track> {
-    const { id, ...songWithoutId } = song;
-    return this.http.post<Track>(`${this.adminBaseUrl}`, songWithoutId);
+  createSong(song: Track, audioFile: File): Observable<Track> {
+    const formData = new FormData();
+    
+    formData.append('titre', song.titre);
+    const formattedDate = new Date(song.date).toISOString().split('T')[0];
+    formData.append('date', formattedDate);
+    formData.append('category', song.category);
+    formData.append('description', song.description || '');
+    formData.append('albumId', song.albumId || '');
+    
+    formData.append('audioFile', audioFile, audioFile.name);
+
+    console.log('FormData contents:');
+    formData.forEach((value, key) => {
+        console.log(`${key}:`, value);
+    });
+
+    const headers = new HttpHeaders();    
+    return this.http.post<Track>(`${this.adminBaseUrl}`, formData, { headers })
+        .pipe(
+            catchError(error => {
+                console.error('Server error:', error);
+                return throwError(() => new Error('Failed to upload song. Please try again.'));
+            })
+        );
   }
 
+  
   updateSong(id: string, song: Track): Observable<Track> {
     return this.http.put<Track>(`${this.adminBaseUrl}/${id}`, song);
   }

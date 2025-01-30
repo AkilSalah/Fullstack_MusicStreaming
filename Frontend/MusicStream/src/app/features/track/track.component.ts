@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, switchMap, tap } from 'rxjs';
@@ -8,22 +8,23 @@ import * as PlayerSelectors from '../store/selectors/audio-player.selectors';
 import { Track } from '../../core/models/track';
 import { PlayerState } from '../store/reducers/trackPlayer.reducer';
 import { SongService } from '../../core/services/song.service';
+import { AlbumService } from '../../core/services/album.service';
 
 @Component({
   selector: 'app-track',
   templateUrl: './track.component.html'
 })
-export class TrackComponent implements OnInit {
+export class TrackComponent implements OnInit,AfterViewInit,OnDestroy {
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
-  
+
   track: any = {};
+  album : any = {};
   playerStatus$: Observable<PlayerState>;
   playerError$: Observable<string | null>;
   audioUrl: string | null = null;
   imageUrl: string | null = null;  
   trackId : string | null = null;
 
-  // Player state
   isPlaying = false;
   isMuted = false;
   volume = 1;
@@ -35,6 +36,7 @@ export class TrackComponent implements OnInit {
    currentTrackIndex = -1;
 
   constructor(
+    private albumService : AlbumService,
     private route: ActivatedRoute,
     private router: Router,
     private trackService: SongService,
@@ -46,20 +48,43 @@ export class TrackComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this.trackId = this.route.snapshot.paramMap.get('id');
+    this.trackId = this.route.snapshot.paramMap.get("id")
     if (this.trackId) {
-      this.loadSongById(this.trackId);
+      this.loadSongById(this.trackId)
     } else {
-      console.log('Error loading track');
+      console.error("Track ID is missing.")
+    }
+
+    this.playerStatus$.subscribe((status) => {
+      if (status === PlayerState.PLAYING) {
+        this.audioPlayer.nativeElement.play()
+      } else if (status === PlayerState.PAUSED) {
+        this.audioPlayer.nativeElement.pause()
+      } else if (status === PlayerState.STOPPED) {
+        this.audioPlayer.nativeElement.pause()
+        this.audioPlayer.nativeElement.currentTime = 0
+      }
+    })
+  }
+
+  ngAfterViewInit() {
+    if (this.audioPlayer) {
+      console.log('AudioPlayer initialized:', this.audioPlayer.nativeElement);
     }
   }
 
   loadSongById(id: string) {
+    this.stopCurrentAudio(); // Arrêtez l'audio actuel avant de charger une nouvelle piste
+  
     this.trackService.getSongById(id).subscribe({
       next: (data) => {
-        this.track = data; 
-        console.log("loaded song with id: " + id);
-        console.log(this.track);
+        this.track = data;
+        if (this.track.audioFile.startsWith('blob:')) {
+          this.audioUrl = this.track.audioFile;
+        } else {
+          this.audioUrl = `http://localhost:8080${this.track.audioFile}`;
+        }
+        console.log("loaded song with id: " + id, this.track);
       },
       error: (err) => {
         console.log("error loading song with id " + id, err);
@@ -67,39 +92,41 @@ export class TrackComponent implements OnInit {
     });
   }
   
-// private loadTrackImage(trackId: string) {
-  //   this.trackService.getImageFile(trackId).subscribe({
-  //     next: (imageBlob) => {
-  //       if (imageBlob) {
-  //         // Nettoyer l'ancienne URL si elle existe
-  //         if (this.imageUrl) {
-  //           URL.revokeObjectURL(this.imageUrl);
-  //         }
-  //         // Créer une nouvelle URL pour l'image
-  //         this.imageUrl = URL.createObjectURL(imageBlob);
-  //       }
-  //     },
-  //     error: (error) => {
-  //       console.error('Error loading track image:', error);
-  //     }
-  //   });
-  // }
+  loadAlbumById(albumId: string) {
+    this.albumService.getAlbumById(albumId).subscribe({
+      next: (data)=> {
+        this.album = data; 
+      },
+      error: (err) => {
+        console.log("error loading album with id " + albumId, err)
+      },
+    })
+  }
+
   private formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
-  togglePlay() {
-    if (this.audioPlayer.nativeElement.paused) {
-      this.audioPlayer.nativeElement.play();
-    } else {
+  stopCurrentAudio() {
+    if (this.audioPlayer) {
       this.audioPlayer.nativeElement.pause();
+      this.audioPlayer.nativeElement.currentTime = 0;
+      this.isPlaying = false;
     }
   }
 
-
-
+  togglePlay() {
+    if (this.audioPlayer.nativeElement.paused) {
+      this.audioPlayer.nativeElement.play()
+      this.store.dispatch(PlayerActions.play())
+    } else {
+      this.audioPlayer.nativeElement.pause()
+      this.store.dispatch(PlayerActions.pause())
+    }
+  }
+  
   toggleMute() {
     this.audioPlayer.nativeElement.muted = !this.audioPlayer.nativeElement.muted;
     this.isMuted = this.audioPlayer.nativeElement.muted;
@@ -130,6 +157,49 @@ export class TrackComponent implements OnInit {
     const audio = this.audioPlayer.nativeElement;
     this.duration = this.formatTime(audio.duration);
   }
+
+  nextTrack() {
+    if (this.currentTrackIndex < this.tracks.length - 1) {
+      const nextTrack = this.tracks[this.currentTrackIndex + 1];
+      this.router.navigate(['/track', nextTrack.id]);
+    }
+  }
+
+  previousTrack() {
+    if (this.currentTrackIndex > 0) {
+      const prevTrack = this.tracks[this.currentTrackIndex - 1];
+      this.router.navigate(['/track', prevTrack.id]);
+    }
+  }
+
+  onPlay() {
+    this.isPlaying = true;
+    this.store.dispatch(PlayerActions.play());
+  }
+
+  onPause() {
+    this.isPlaying = false;
+    this.store.dispatch(PlayerActions.pause());
+  }
+
+  onStop() {
+    this.isPlaying = false;
+    this.store.dispatch(PlayerActions.stop());
+  }
+
+  onError() {
+    const audioElement = this.audioPlayer.nativeElement;
+    console.error('Audio Player Error:', audioElement.error);
+    this.store.dispatch(PlayerActions.loadError({ error: 'Error playing audio file' }));
+  }
+
+  ngOnDestroy() {
+    if (this.audioUrl && this.audioUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(this.audioUrl);
+    }
+  }
+
+
 
   // private loadTrack(trackId: string) {
   //   this.store.dispatch(PlayerActions.startLoading({ id: trackId }));
@@ -166,45 +236,40 @@ export class TrackComponent implements OnInit {
   //   });
   // }
 
-  nextTrack() {
-    if (this.currentTrackIndex < this.tracks.length - 1) {
-      const nextTrack = this.tracks[this.currentTrackIndex + 1];
-      this.router.navigate(['/track', nextTrack.id]);
-    }
-  }
+  // private loadTrackImage(trackId: string) {
+  //   this.trackService.getImageFile(trackId).subscribe({
+  //     next: (imageBlob) => {
+  //       if (imageBlob) {
+  //         // Nettoyer l'ancienne URL si elle existe
+  //         if (this.imageUrl) {
+  //           URL.revokeObjectURL(this.imageUrl);
+  //         }
+  //         // Créer une nouvelle URL pour l'image
+  //         this.imageUrl = URL.createObjectURL(imageBlob);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading track image:', error);
+  //     }
+  //   });
+  // }
 
-  previousTrack() {
-    if (this.currentTrackIndex > 0) {
-      const prevTrack = this.tracks[this.currentTrackIndex - 1];
-      this.router.navigate(['/track', prevTrack.id]);
-    }
-  }
 
-  onPlay() {
-    this.isPlaying = true;
-    this.store.dispatch(PlayerActions.play());
-  }
-
-  onPause() {
-    this.isPlaying = false;
-    this.store.dispatch(PlayerActions.pause());
-  }
-
-  onStop() {
-    this.isPlaying = false;
-    this.store.dispatch(PlayerActions.stop());
-  }
-
-  onError() {
-    this.store.dispatch(PlayerActions.loadError({ error: 'Error playing audio file' }));
-  }
-
-  ngOnDestroy() {
-    if (this.audioUrl) {
-      URL.revokeObjectURL(this.audioUrl);
-    }
-    if(this.imageUrl){
-      URL.revokeObjectURL(this.imageUrl)
-    }
-  }
+  // private loadTrackImage(trackId: string) {
+  //   this.trackService.getImageFile(trackId).subscribe({
+  //     next: (imageBlob) => {
+  //       if (imageBlob) {
+  //         // Nettoyer l'ancienne URL si elle existe
+  //         if (this.imageUrl) {
+  //           URL.revokeObjectURL(this.imageUrl);
+  //         }
+  //         // Créer une nouvelle URL pour l'image
+  //         this.imageUrl = URL.createObjectURL(imageBlob);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading track image:', error);
+  //     }
+  //   });
+  // }
 }

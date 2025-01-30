@@ -21,13 +21,13 @@ public class Chanson {
     @Id
     private String id;
     private String titre;
-    private Integer duree;  
-    private Integer trackNumber;
+    // private Integer duree;  
+    // private Integer trackNumber;
     private String description;
     private String category;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
-    private String audioFile;
+    private String audioFile; 
 
     @DBRef
     @NotNull(message = "L'album est obligatoire")

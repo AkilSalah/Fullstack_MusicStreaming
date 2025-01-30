@@ -9,8 +9,9 @@ import org.mapstruct.Mapping;
 public interface ChansonMapper {
     @Mapping(target = "albumId", source = "album.id") 
     ChansonDTO toDto(Chanson chanson);
-
-    @Mapping(target = "album", ignore = true) 
+    
+    @Mapping(target = "audioFile", ignore = true) 
+    @Mapping(target = "album", ignore = true)
     Chanson toEntity(ChansonDTO chansonDTO);
 }
 

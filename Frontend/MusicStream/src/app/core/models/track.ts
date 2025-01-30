@@ -2,7 +2,7 @@ export interface Track {
   id: string;
   titre: string;
   artiste?: string;
-  description?: string;
+  description: string;
   date: Date;
   duree?: number;
   category: MusicCategory;
