@@ -8,6 +8,8 @@ import { User } from '../models/user';
 })
 export class AuthService {
   private baseUrl = 'http://localhost:8080/api/auth'
+  private role: string | null = localStorage.getItem('role');
+
   constructor(private http:HttpClient) { }
 
   register(user : User):Observable<any>{
@@ -16,8 +18,25 @@ export class AuthService {
   login(user : User) : Observable<any>{
     return this.http.post(`${this.baseUrl}/login`,user)
   }
-  logout(token:string):Observable<any>{
-    const headers = new HttpHeaders().set('Authorization',`Bearer ${token}`);
-    return this.http.post(`${this.baseUrl}/logout`, {}, { headers });
+  logout(token: string): Observable<any> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post(`${this.baseUrl}/logout`, {}, { 
+      headers,
+      responseType: 'text' 
+    });
+  }
+  
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');  
+  }
+
+  isAdmin(): boolean {
+    const role = localStorage.getItem('role'); 
+    return role === 'ADMIN';  
+  }
+
+  getUserRole(): string | null {
+    return this.role;
   }
 }

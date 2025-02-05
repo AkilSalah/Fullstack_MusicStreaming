@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AlbumService } from '../../core/services/album.service';
 import { Album } from '../../core/models/album';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-album',
@@ -18,14 +19,17 @@ export class AlbumComponent {
     artiste: '',
     annee: 0
   };
-
+  isAdmin : boolean = false;
   showModal: boolean = false
 
-  constructor(private albumService: AlbumService) {}
+  constructor(private albumService: AlbumService , private auth : AuthService) {}
 
   ngOnInit(): void {
+    this.isAdmin = this.auth.isAdmin();
     this.loadAlbums();
   }
+
+
 
   openModalForUpdate(album: Album): void {
     this.selectedAlbum = { ...album }; 

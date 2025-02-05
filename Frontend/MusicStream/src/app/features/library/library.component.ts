@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MusicCategory, Track } from '../../core/models/track';
 import { SongService } from '../../core/services/song.service';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-library',
@@ -30,10 +31,12 @@ export class LibraryComponent {
   showModal: boolean = false;
   albumId: string | null = null;
   selectedAudioFile: File | null = null;
+  isAdmin: boolean = false;
 
-  constructor(private songService: SongService, private router: ActivatedRoute) {}
+  constructor(private songService: SongService,private auth: AuthService, private router: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.isAdmin = this.auth.isAdmin();
     this.albumId = this.router.snapshot.paramMap.get('id');
     if (this.albumId) {
       console.log('Album ID:', this.albumId);
