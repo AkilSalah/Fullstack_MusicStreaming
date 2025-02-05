@@ -16,14 +16,14 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadDirectory + "/");
     }
-    
+
     @Override
-    public void addCorsMappings(CorsRegistry registry){
-        registry.addMapping("/api/**")
-        .allowedOrigins("http://localhost:4200")
-        .allowedMethods("GET","POST","PUT","PATCH","DELETE")
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(4000);
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("http://localhost:4200")
+            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 }
