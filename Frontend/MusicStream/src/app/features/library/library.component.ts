@@ -3,6 +3,7 @@ import { MusicCategory, Track } from '../../core/models/track';
 import { SongService } from '../../core/services/song.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-library',
@@ -32,6 +33,8 @@ export class LibraryComponent {
   albumId: string | null = null;
   selectedAudioFile: File | null = null;
   isAdmin: boolean = false;
+  selectedCategory: string = 'ALL';
+
 
   constructor(private songService: SongService,private auth: AuthService, private router: ActivatedRoute) {}
 
@@ -44,6 +47,16 @@ export class LibraryComponent {
     } else {
       console.error('Album ID is missing.');
     }
+  }
+
+  filterByCategory(category: string) {
+    this.selectedCategory = category;
+    this.songService.getAllSongs().subscribe(response => {
+      const tracks = response.content ; 
+      this.songs = Array.isArray(tracks) 
+        ? (category === 'ALL' ? tracks : tracks.filter(track => track.category.toLowerCase() === category.toLowerCase()))
+        : [];
+    });
   }
 
   onFileSelected(event: any): void {
