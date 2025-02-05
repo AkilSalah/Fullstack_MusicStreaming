@@ -38,7 +38,8 @@ export class SongService {
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
-    return this.http.get(`${this.userBaseUrl}/album/${albumId}`, { params });
+    return this.http.get<Track[]>(`${this.userBaseUrl}/album/${albumId}`, { params })
+    ;
   }
 
   createSong(song: Track, audioFile: File): Observable<Track> {

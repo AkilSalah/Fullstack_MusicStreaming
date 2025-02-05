@@ -1,13 +1,14 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, switchMap } from 'rxjs';
 import * as PlayerActions from '../store/actions/audio-player.action';
 import * as PlayerSelectors from '../store/selectors/audio-player.selectors';
 import { Track } from '../../core/models/track';
 import { PlayerState, PlayerStateModel } from '../store/reducers/trackPlayer.reducer';
 import { SongService } from '../../core/services/song.service';
 import { AlbumService } from '../../core/services/album.service';
+
 
 @Component({
   selector: "app-track",
@@ -16,7 +17,7 @@ import { AlbumService } from '../../core/services/album.service';
 export class TrackComponent implements OnInit, OnDestroy {
   @ViewChild("audioPlayer") audioPlayer!: ElementRef<HTMLAudioElement>;
 
-  track: Track = {} as Track;
+  track: Track | null = null;
   album: any = {};
   playerStatus$: Observable<PlayerState>;
   playerError$: Observable<string | null>;
@@ -32,7 +33,8 @@ export class TrackComponent implements OnInit, OnDestroy {
   progress = 0;
 
   tracks: Track[] = [];
-  currentTrackIndex = -1;
+  currentTrackIndex = 0;
+  private subscription = new Subscription();
 
   constructor(
     private albumService: AlbumService,
@@ -49,21 +51,19 @@ export class TrackComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.trackId = this.route.snapshot.paramMap.get("id");
     if (this.trackId) {
-      this.store.dispatch(PlayerActions.startLoading({ id: this.trackId }));
-      this.loadSongById(this.trackId);
-    } else {
-      console.error("Track ID is missing.");
+      this.loadSongAndRelated(this.trackId);
     }
 
-    this.currentTrack$.subscribe((track) => {
-      if (track) {
-        this.track = track;
-        this.audioUrl = `http://localhost:8080/uploads/${track.audioFile}`;
-        this.loadAudio();
-      }
-    });
+    this.subscription.add(
+      this.currentTrack$.subscribe(track => {
+        if (track) {
+          this.track = track;
+          this.audioUrl = `http://localhost:8080/uploads/${track.audioFile}`;
+          this.loadAudio();
+        }
+      })
+    );
 
-    // Add more event listeners for detailed error handling
     if (this.audioPlayer?.nativeElement) {
       const audio = this.audioPlayer.nativeElement;
       audio.addEventListener('error', (event) => {
@@ -78,6 +78,26 @@ export class TrackComponent implements OnInit, OnDestroy {
     }
   }
 
+  loadSongAndRelated(trackId: string) {
+    this.songService.getSongById(trackId).pipe(
+      switchMap(song => {
+        this.store.dispatch(PlayerActions.loadSuccess({ track: song }));
+        return this.songService.getSongsByAlbum(song.albumId);
+      })
+    ).subscribe({
+      next: (response) => {
+        this.tracks = response.content || []; 
+        this.currentTrackIndex = this.tracks.findIndex(t => t.id === trackId);
+      },
+      error: (err) => {
+        console.error("Error loading songs", err);
+        this.store.dispatch(PlayerActions.loadError({ error: err.message }));
+      }
+    });
+  }
+  
+  
+
   loadSongById(id: string) {
     this.stopCurrentAudio();
     this.songService.getSongById(id).subscribe({
@@ -88,8 +108,8 @@ export class TrackComponent implements OnInit, OnDestroy {
         this.loadAudio();
       },
       error: (err) => {
-        console.error("Error loading song with id " + id, err);
-        this.store.dispatch(PlayerActions.loadError({ error: err.message || "Failed to load track" }));
+        console.error("Error loading track", err);
+        this.store.dispatch(PlayerActions.loadError({ error: err.message }));
       },
     });
   }
@@ -104,6 +124,28 @@ export class TrackComponent implements OnInit, OnDestroy {
         this.duration = this.formatTime(audioElement.duration);
       };
     }
+  }
+
+  previousTrack() {
+    if (this.tracks.length > 0 && this.currentTrackIndex > 0) {
+      this.currentTrackIndex--;
+      const previousTrack = this.tracks[this.currentTrackIndex];
+      this.navigateToTrack(previousTrack.id);
+    }
+  }
+  
+  nextTrack() {
+    if (this.tracks.length > 0 && this.currentTrackIndex < this.tracks.length - 1) {
+      this.currentTrackIndex++;
+      const nextTrack = this.tracks[this.currentTrackIndex];
+      this.navigateToTrack(nextTrack.id);
+    }
+  }
+  
+  private navigateToTrack(trackId: string) {
+    this.stopCurrentAudio();
+    this.router.navigate(["/track", trackId]);
+    this.loadSongById(trackId);
   }
 
   togglePlay(): void {
@@ -163,27 +205,6 @@ export class TrackComponent implements OnInit, OnDestroy {
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   }
 
-  ngOnDestroy() {
-    if (this.audioUrl && this.audioUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(this.audioUrl);
-    }
-    this.stopCurrentAudio();
-  }
-
-  previousTrack() {
-    if (this.currentTrackIndex > 0) {
-      this.currentTrackIndex--;
-      this.loadSongById(this.tracks[this.currentTrackIndex].id);
-    }
-  }
-
-  nextTrack() {
-    if (this.currentTrackIndex < this.tracks.length - 1) {
-      this.currentTrackIndex++;
-      this.loadSongById(this.tracks[this.currentTrackIndex].id);
-    }
-  }
-
   seekTo(event: MouseEvent) {
     if (!this.audioPlayer?.nativeElement) return;
     const audio = this.audioPlayer.nativeElement;
@@ -198,5 +219,13 @@ export class TrackComponent implements OnInit, OnDestroy {
     const audio = this.audioPlayer.nativeElement;
     console.error("Error occurred while playing the audio:", audio.error);
     this.store.dispatch(PlayerActions.loadError({ error: "An error occurred while playing the audio." }));
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+    if (this.audioUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(this.audioUrl);
+    }
+    this.stopCurrentAudio();
   }
 }
