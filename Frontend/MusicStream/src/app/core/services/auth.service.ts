@@ -1,42 +1,65 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { User } from '../models/user';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/auth'
-  private role: string | null = localStorage.getItem('role');
+  private baseUrl = 'http://localhost:8080/api/auth';
 
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  register(user : User):Observable<any>{
-    return this.http.post(`${this.baseUrl}/register`,user)
+  register(user: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/register`, user);
   }
-  login(user : User) : Observable<any>{
-    return this.http.post(`${this.baseUrl}/login`,user)
+
+  login(user: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/login`, user).pipe(
+      tap((response) => {
+        if (response.token) {
+          this.saveSession(response.token, response.roles);
+        }
+      })
+    );
   }
-  logout(token: string): Observable<any> {
+
+  logout(): Observable<any> {
+    const token = this.getToken();
+    if (!token) return new Observable(observer => observer.complete());
+
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post(`${this.baseUrl}/logout`, {}, { 
-      headers,
-      responseType: 'text' 
-    });
+
+    return this.http.post(`${this.baseUrl}/logout`, {}, { headers, responseType: 'text' }).pipe(
+      tap(() => this.clearSession())
+    );
   }
-  
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');  
+    return !!this.getToken();
   }
 
   isAdmin(): boolean {
-    const role = localStorage.getItem('role'); 
-    return role === 'ADMIN';  
+    return this.getRoles().includes('ADMIN');
   }
 
-  getUserRole(): string | null {
-    return this.role;
+  private saveSession(token: string, roles: any[]): void {
+    localStorage.setItem('token', token);
+    const roleNames = roles ? roles.map((role: any) => role.name) : [];
+    localStorage.setItem('roles', JSON.stringify(roleNames));
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('roles');
+  }
+
+  private getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  private getRoles(): string[] {
+    const roles = localStorage.getItem('roles');
+    return roles ? JSON.parse(roles) : [];
   }
 }

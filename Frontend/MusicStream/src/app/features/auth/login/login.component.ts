@@ -16,17 +16,17 @@ user = {
 
 errorMessage : string | null = null;
 constructor(private authService :  AuthService , private router : Router){}
-login(){
+
+login() {
   this.authService.login(this.user).subscribe({
-    next : (response) => {
-      localStorage.setItem('token',response.token);
-      console.log(response.token)
+    next: () => {
       this.router.navigate(['/home']);
     },
-    error:(err) =>{
-      this.errorMessage = 'login failed : ' +err.console.error;
-      
+    error: (err) => {
+      console.error('Login failed:', err);
+      this.errorMessage = 'Login failed: ' + (err.error?.message || 'Unknown error');
     },
   });
 }
+
 }

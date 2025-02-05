@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { SearchService } from '../../../core/services/search.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 
@@ -10,31 +9,20 @@ import { Router } from '@angular/router';
 })
 export class NavbarComponent {
   isAdmin: boolean = false;
-  
-  constructor(private authService : AuthService ,private router : Router) {}
+  isLoggedIn: boolean = false;
+
+  constructor(private authService: AuthService , private router :Router) {}
 
   ngOnInit(): void {
+    this.isLoggedIn = this.authService.isLoggedIn();
     this.isAdmin = this.authService.isAdmin();
   }
-  
+
   logout(): void {
-    const token = localStorage.getItem('token'); 
-
-    if (token) {
-      this.authService.logout(token).subscribe({
-        next: () => {
-          localStorage.removeItem('token'); 
-          this.router.navigate(['/login']); 
-        },
-        error: (err) => {
-          console.error("Erreur lors de la déconnexion :", err);
-        }
-      });
-    } else {
-      console.warn("Aucun token trouvé !");
+    this.authService.logout().subscribe(() => {
+      this.isLoggedIn = false;
+      this.isAdmin = false;
       this.router.navigate(['/login']);
-    }
+    });
   }
-
-  
 }

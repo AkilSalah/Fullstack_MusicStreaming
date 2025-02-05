@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { User } from '../../core/models/user';
 import { UserService } from '../../core/services/userManagement.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,11 +14,15 @@ export class DashboardComponent {
   selectedUser: any = null;
   selectedRoles: string[] = [];
   isEditModalOpen: boolean = false;
+  isAdmin: boolean = false;
+  isLoggedIn: boolean = false;
 
-  constructor(private userManagement : UserService){}
+  constructor(private userManagement : UserService, private auth :AuthService){}
 
   ngOnInit(): void {
     this.loadUsers();
+    this.isLoggedIn = this.auth.isLoggedIn();
+    this.isAdmin = this.auth.isAdmin();
   }
 
   loadUsers() : void{
