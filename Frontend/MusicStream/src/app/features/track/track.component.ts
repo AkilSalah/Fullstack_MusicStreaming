@@ -8,6 +8,7 @@ import { Track } from '../../core/models/track';
 import { PlayerState, PlayerStateModel } from '../store/reducers/trackPlayer.reducer';
 import { SongService } from '../../core/services/song.service';
 import { AlbumService } from '../../core/services/album.service';
+import { data } from 'autoprefixer';
 
 
 @Component({
@@ -82,6 +83,7 @@ export class TrackComponent implements OnInit, OnDestroy {
     this.songService.getSongById(trackId).pipe(
       switchMap(song => {
         this.store.dispatch(PlayerActions.loadSuccess({ track: song }));
+        this.getAlbum(song.albumId);
         return this.songService.getSongsByAlbum(song.albumId);
       })
     ).subscribe({
@@ -96,8 +98,19 @@ export class TrackComponent implements OnInit, OnDestroy {
     });
   }
   
+  getAlbum(id: string) {
+    this.albumService.getAlbumById(id).subscribe({
+      next: (data) => {
+        this.album = data;
+        console.log("Nom de l'artiste:", this.album.artiste);
+      },
+      error: (err) => {
+        console.error("Erreur lors de la récupération de l'album:", err);
+      }
+    });
+  }
   
-
+  
   loadSongById(id: string) {
     this.stopCurrentAudio();
     this.songService.getSongById(id).subscribe({
