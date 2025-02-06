@@ -41,6 +41,13 @@ export class LibraryComponent {
   ngOnInit(): void {
     this.isAdmin = this.auth.isAdmin();
     this.albumId = this.router.snapshot.paramMap.get('id');
+    this.router.data.subscribe(data => {
+      if (data['songs']) {  
+        this.songs = data['songs'].content;  
+        this.totalItems = data['songs'].totalElements;
+        console.log('Songs pre charger:', this.songs);
+      }
+    });
     if (this.albumId) {
       console.log('Album ID:', this.albumId);
       this.loadSongsByAlbum(this.albumId);
